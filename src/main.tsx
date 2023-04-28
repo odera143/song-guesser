@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { redirectToAuthCodeFlow } from './services/SpotifyInit.tsx';
-// import App from './App.tsx';
 import FindCategory from './routes/FindCategory.tsx';
 import ErrorPage from './error-page.tsx';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
