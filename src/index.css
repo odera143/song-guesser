@@ -96,3 +96,15 @@ button:focus-visible {
   display: flex;
   justify-content: space-evenly;
 }
+
+.button-separator-gap {
+  display: flex;
+  gap: 20px;
+}
+
+.song-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 90px;
+}

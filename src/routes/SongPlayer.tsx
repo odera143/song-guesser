@@ -1,5 +1,7 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import hiddenAlbum from '../assets/questionMark.png';
+const market = 'US';
 
 export default function SongPlayer(props: { accessToken: string }) {
   const { playlistId } = useParams();
@@ -7,13 +9,24 @@ export default function SongPlayer(props: { accessToken: string }) {
     tracks: { limit: 0, total: 0, items: [] },
   });
   const [position, setPosition] = useState(0);
+  const [timer, setTimer] = useState(10);
+  const [revealTimer, setRevealTimer] = useState(5);
+  const [hideArt, setHideArt] = useState(true);
+  const [hideTrack, setHideTrack] = useState(true);
+  const [hideArtist, setHideArtist] = useState(true);
+  const audioPlayer = useRef<HTMLAudioElement>(null);
+  const playButton = useRef<HTMLButtonElement>(null);
+  const nextButton = useRef<HTMLButtonElement>(null);
+  const timeInput = useRef<HTMLInputElement>(null);
+  const revealTimeInput = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     fetchPlaylist(props.accessToken);
   }, []);
 
   async function fetchPlaylist(token: string) {
     const result = await fetch(
-      `https://api.spotify.com/v1/playlists/${playlistId}`,
+      `https://api.spotify.com/v1/playlists/${playlistId}?market=${market}`,
       {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
@@ -21,8 +34,39 @@ export default function SongPlayer(props: { accessToken: string }) {
     );
     setPlaylist(await result.json());
   }
+
+  function startSong() {
+    audioPlayer.current!.play();
+    playButton.current!.disabled = true;
+    timeInput.current!.disabled = true;
+    revealTimeInput.current!.disabled = true;
+    setTimeout(() => {
+      audioPlayer.current!.pause();
+    }, timer * 1000);
+  }
+
+  function nextTrack() {
+    setPosition(position + 1);
+    playButton.current!.disabled = false;
+    timeInput.current!.disabled = false;
+    revealTimeInput.current!.disabled = false;
+    setHideArt(true);
+    setHideTrack(true);
+    setHideArtist(true);
+    nextButton.current!.disabled = true;
+  }
+
+  function countdownToReveal() {
+    setTimeout(() => {
+      setHideArt(false);
+      setHideTrack(false);
+      setHideArtist(false);
+      nextButton.current!.disabled = false;
+    }, revealTimer * 1000);
+  }
+
   return (
-    <div>
+    <div className='song-player'>
       {/* {playlist.tracks.items.map((item) => (
         <div key={item.track.id}>
           <span>{item.track.name} - </span>
@@ -32,22 +76,78 @@ export default function SongPlayer(props: { accessToken: string }) {
         </div>
       ))} */}
       <div className='generic-column-container'>
+        <label>
+          Play tracks for{' '}
+          <input
+            type='number'
+            value={timer}
+            max={30}
+            onChange={(event) =>
+              Number(event.target.value) <= 30
+                ? setTimer(Number(event.target.value))
+                : setTimer(30)
+            }
+            ref={timeInput}
+          />{' '}
+          seconds
+        </label>
+        <label>
+          Reveal after{' '}
+          <input
+            type='number'
+            value={revealTimer}
+            max={30}
+            onChange={(event) =>
+              Number(event.target.value) <= 30
+                ? setRevealTimer(Number(event.target.value))
+                : setRevealTimer(30)
+            }
+            ref={revealTimeInput}
+          />{' '}
+          seconds
+        </label>
+      </div>
+      <div className='generic-column-container'>
         <img
-          src={playlist.tracks.items[position]?.track.album.images[0].url}
+          src={
+            hideArt
+              ? hiddenAlbum
+              : playlist.tracks.items[position]?.track.album.images[0].url
+          }
           height={400}
         />
         <audio
           src={playlist.tracks.items[position]?.track.preview_url}
-          controls
+          controls={false}
           controlsList='nodownload'
+          onPause={countdownToReveal}
+          ref={audioPlayer}
         ></audio>
         <div>
-          <span>{playlist.tracks.items[position]?.track.name} - </span>
-          {playlist.tracks.items[position]?.track.artists.map((artist) => (
-            <span key={artist.name}>{artist.name} </span>
-          ))}
+          <span>
+            {hideTrack
+              ? '? ? ? ? ? ? ? ? ?'
+              : playlist.tracks.items[position]?.track.name}
+            {' - '}
+          </span>
+          {hideArtist
+            ? '? ? ? ? ? ? ? ? ?'
+            : playlist.tracks.items[position]?.track.artists.map((artist) => (
+                <span key={artist.name}>{artist.name} </span>
+              ))}
         </div>
-        <button onClick={() => setPosition(position + 1)}>next</button>
+
+        <button ref={playButton} onClick={startSong}>
+          Play
+        </button>
+        <button ref={nextButton} onClick={nextTrack}>
+          Next
+        </button>
+      </div>
+      <div className='button-separator-gap'>
+        <button onClick={() => setHideArt(false)}>Reveal Cover Art</button>
+        <button onClick={() => setHideTrack(false)}>Reveal Track Name</button>
+        <button onClick={() => setHideArtist(false)}>Reveal Artist(s)</button>
       </div>
     </div>
   );
