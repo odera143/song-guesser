@@ -2,7 +2,7 @@
 
 Guess The Song is a song guessing game that leverages the Spotify API. Users can search for a category (such as 90s Rock) and select a playlist from the results. They can then listen to a 10-second snippet from each song from the playlist and have to type in either the artist's name or the song title for points.
 
-Please note that this project is for educational purposes only and the creator has no intention of hosting it anywhere other than GitHub. Potential users must provide their own client_id upon cloning the application before running it.
+Please note that this project is for educational purposes only and I have no intention of hosting it anywhere other than GitHub. Potential users must provide their own client_id upon cloning the application before running it.
 
 ## Technologies Used
 - React
