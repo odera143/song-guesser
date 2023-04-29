@@ -1,10 +1,9 @@
 import { Form } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import DisplayResults from './DisplayResults';
 
 export default function FindCategory(props: { accessToken: string }) {
   const [category, setCategory] = useState<string>('');
-  const [profile, setProfile] = useState({});
   const [searchResults, setSearchResults] = useState<SearchResult>({
     playlists: {
       href: '',
@@ -16,19 +15,6 @@ export default function FindCategory(props: { accessToken: string }) {
       items: [],
     },
   });
-
-  useEffect(() => {
-    fetchProfile(props.accessToken);
-  }, []);
-
-  async function fetchProfile(token: string): Promise<any> {
-    const result = await fetch('https://api.spotify.com/v1/me', {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    setProfile(await result.json());
-  }
 
   async function search(token: string) {
     const params = new URLSearchParams();
