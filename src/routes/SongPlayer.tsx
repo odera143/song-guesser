@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import hiddenAlbum from '../assets/questionMark.png';
+
 const market = 'US';
 
 export default function SongPlayer(props: { accessToken: string }) {
@@ -37,9 +38,7 @@ export default function SongPlayer(props: { accessToken: string }) {
 
   function startSong() {
     audioPlayer.current!.play();
-    playButton.current!.disabled = true;
-    timeInput.current!.disabled = true;
-    revealTimeInput.current!.disabled = true;
+    disableInputs(true);
     setTimeout(() => {
       audioPlayer.current!.pause();
     }, timer * 1000);
@@ -47,22 +46,28 @@ export default function SongPlayer(props: { accessToken: string }) {
 
   function nextTrack() {
     setPosition(position + 1);
-    playButton.current!.disabled = false;
-    timeInput.current!.disabled = false;
-    revealTimeInput.current!.disabled = false;
-    setHideArt(true);
-    setHideTrack(true);
-    setHideArtist(true);
+    disableInputs(false);
+    hideTrackInfo(true);
     nextButton.current!.disabled = true;
   }
 
   function countdownToReveal() {
     setTimeout(() => {
-      setHideArt(false);
-      setHideTrack(false);
-      setHideArtist(false);
+      hideTrackInfo(false);
       nextButton.current!.disabled = false;
     }, revealTimer * 1000);
+  }
+
+  function disableInputs(value: boolean) {
+    playButton.current!.disabled = value;
+    timeInput.current!.disabled = value;
+    revealTimeInput.current!.disabled = value;
+  }
+
+  function hideTrackInfo(value: boolean) {
+    setHideArt(value);
+    setHideTrack(value);
+    setHideArtist(value);
   }
 
   return (
