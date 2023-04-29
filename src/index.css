@@ -133,3 +133,14 @@ button:focus-visible {
 input[type='number'] {
   width: 30px;
 }
+
+.spotify-card {
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  padding: 10px;
+  background-color: black;
+}
+.spotify-card:hover {
+  border-color: #1db954;
+}

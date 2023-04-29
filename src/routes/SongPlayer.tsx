@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import hiddenAlbum from '../assets/questionMark.png';
+import spotifyLogo from '../assets/Spotify_Logo_RGB_Green.png';
 
 const market = 'US';
 
@@ -139,18 +140,18 @@ export default function SongPlayer(props: { accessToken: string }) {
         onPause={countdownToReveal}
         ref={audioPlayer}
       ></audio>
-      <div>
-        <span>
+      <div style={{ display: 'flex' }}>
+        <h3>
           {hideTrack
             ? '? ? ? ? ? ? ? ? ?'
             : playlist.tracks.items[position]?.track.name}
           {' - '}
-        </span>
-        {hideArtist
-          ? '? ? ? ? ? ? ? ? ?'
-          : playlist.tracks.items[position]?.track.artists.map((artist) => (
-              <span key={artist.name}>{artist.name} </span>
-            ))}
+          {hideArtist
+            ? '? ? ? ? ? ? ? ? ?'
+            : playlist.tracks.items[position]?.track.artists.map((artist) =>
+                artist.name.concat(' ')
+              )}
+        </h3>
       </div>
       <div className='button-separator-gap'>
         <button ref={playButton} onClick={startSong}>
@@ -159,6 +160,17 @@ export default function SongPlayer(props: { accessToken: string }) {
         <button ref={nextButton} onClick={nextTrack}>
           Next
         </button>
+      </div>
+      <div>
+        <a
+          href={playlist.tracks.items[position]?.track.external_urls.spotify}
+          target='_blank'
+        >
+          <div className='spotify-card'>
+            <img src={spotifyLogo} height={50}></img>
+          </div>
+        </a>
+        LISTEN ON SPOTIFY
       </div>
     </div>
   );
