@@ -53,7 +53,6 @@ export default function FindCategory(props: { accessToken: string }) {
           />
         </label>
       </Form>
-      {/* <div>{JSON.stringify(profile)}</div> */}
       <DisplayResults searchResults={searchResults} />
       <div className='button-separator'>
         {searchResults.playlists.previous && (
