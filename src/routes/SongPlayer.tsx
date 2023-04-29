@@ -10,8 +10,9 @@ export default function SongPlayer(props: { accessToken: string }) {
     tracks: { limit: 0, total: 0, items: [] },
   });
   const [position, setPosition] = useState(0);
-  const [timer, setTimer] = useState(10);
-  const [revealTimer, setRevealTimer] = useState(5);
+  const [playTime, setPlayTime] = useState(10);
+  const [revealTime, setRevealTime] = useState(5);
+  const [countdown, setCountdown] = useState(revealTime);
   const [hideArt, setHideArt] = useState(true);
   const [hideTrack, setHideTrack] = useState(true);
   const [hideArtist, setHideArtist] = useState(true);
@@ -41,7 +42,7 @@ export default function SongPlayer(props: { accessToken: string }) {
     disableInputs(true);
     setTimeout(() => {
       audioPlayer.current!.pause();
-    }, timer * 1000);
+    }, playTime * 1000);
   }
 
   function nextTrack() {
@@ -52,10 +53,17 @@ export default function SongPlayer(props: { accessToken: string }) {
   }
 
   function countdownToReveal() {
-    setTimeout(() => {
-      hideTrackInfo(false);
-      nextButton.current!.disabled = false;
-    }, revealTimer * 1000);
+    let x = revealTime;
+    const timer = setInterval(() => {
+      x--;
+      if (x < 0) {
+        clearInterval(timer);
+        hideTrackInfo(false);
+        nextButton.current!.disabled = false;
+      } else {
+        setCountdown(x);
+      }
+    }, 1000);
   }
 
   function disableInputs(value: boolean) {
@@ -71,88 +79,86 @@ export default function SongPlayer(props: { accessToken: string }) {
   }
 
   return (
-    <div className='song-player'>
-      {/* {playlist.tracks.items.map((item) => (
-        <div key={item.track.id}>
-          <span>{item.track.name} - </span>
-          {item.track.artists.map((artist) => (
-            <span key={artist.name}>{artist.name} </span>
-          ))}
+    <div className='generic-column-container'>
+      <h2>{countdown > 0 ? countdown : '-'} seconds until reveal</h2>
+      <div className='song-player'>
+        <div className='options-hints-card'>
+          <h2>Options</h2>
+          <label>
+            Play tracks for{' '}
+            <input
+              type='number'
+              value={playTime}
+              max={30}
+              onChange={(event) =>
+                Number(event.target.value) <= 30
+                  ? setPlayTime(Number(event.target.value))
+                  : setPlayTime(30)
+              }
+              ref={timeInput}
+            />{' '}
+            seconds
+          </label>
+          <label>
+            Reveal after{' '}
+            <input
+              type='number'
+              value={revealTime}
+              max={30}
+              onChange={(event) =>
+                Number(event.target.value) <= 30
+                  ? setRevealTime(Number(event.target.value))
+                  : setRevealTime(30)
+              }
+              ref={revealTimeInput}
+            />{' '}
+            seconds
+          </label>
         </div>
-      ))} */}
-      <div className='generic-column-container'>
-        <label>
-          Play tracks for{' '}
-          <input
-            type='number'
-            value={timer}
-            max={30}
-            onChange={(event) =>
-              Number(event.target.value) <= 30
-                ? setTimer(Number(event.target.value))
-                : setTimer(30)
+        <div className='song-card'>
+          <img
+            src={
+              hideArt
+                ? hiddenAlbum
+                : playlist.tracks.items[position]?.track.album.images[0].url
             }
-            ref={timeInput}
-          />{' '}
-          seconds
-        </label>
-        <label>
-          Reveal after{' '}
-          <input
-            type='number'
-            value={revealTimer}
-            max={30}
-            onChange={(event) =>
-              Number(event.target.value) <= 30
-                ? setRevealTimer(Number(event.target.value))
-                : setRevealTimer(30)
-            }
-            ref={revealTimeInput}
-          />{' '}
-          seconds
-        </label>
+            height={350}
+          />
+        </div>
+        <div className='options-hints-card'>
+          <h2>Hints</h2>
+          <button onClick={() => setHideArt(false)}>Reveal Cover Art</button>
+          <button onClick={() => setHideTrack(false)}>Reveal Track Name</button>
+          <button onClick={() => setHideArtist(false)}>Reveal Artist(s)</button>
+        </div>
       </div>
-      <div className='generic-column-container'>
-        <img
-          src={
-            hideArt
-              ? hiddenAlbum
-              : playlist.tracks.items[position]?.track.album.images[0].url
-          }
-          height={400}
-        />
-        <audio
-          src={playlist.tracks.items[position]?.track.preview_url}
-          controls={false}
-          controlsList='nodownload'
-          onPause={countdownToReveal}
-          ref={audioPlayer}
-        ></audio>
-        <div>
-          <span>
-            {hideTrack
-              ? '? ? ? ? ? ? ? ? ?'
-              : playlist.tracks.items[position]?.track.name}
-            {' - '}
-          </span>
-          {hideArtist
+      <audio
+        src={playlist.tracks.items[position]?.track.preview_url}
+        controls={false}
+        controlsList='nodownload'
+        onPause={countdownToReveal}
+        ref={audioPlayer}
+      ></audio>
+      <div>
+        <span>
+          {hideTrack
             ? '? ? ? ? ? ? ? ? ?'
-            : playlist.tracks.items[position]?.track.artists.map((artist) => (
-                <span key={artist.name}>{artist.name} </span>
-              ))}
-        </div>
-
+            : playlist.tracks.items[position]?.track.name}
+          {' - '}
+        </span>
+        {hideArtist
+          ? '? ? ? ? ? ? ? ? ?'
+          : playlist.tracks.items[position]?.track.artists.map((artist) => (
+              <span key={artist.name}>{artist.name} </span>
+            ))}
+      </div>
+      <div className='button-separator-gap'>
         <button ref={playButton} onClick={startSong}>
           Play
         </button>
         <button ref={nextButton} onClick={nextTrack}>
           Next
         </button>
-      </div>
-      <div className='button-separator-gap'>
-        <button onClick={() => setHideArt(false)}>Reveal Cover Art</button>
-        <button onClick={() => setHideTrack(false)}>Reveal Track Name</button>
-        <button onClick={() => setHideArtist(false)}>Reveal Artist(s)</button>
       </div>
     </div>
   );
